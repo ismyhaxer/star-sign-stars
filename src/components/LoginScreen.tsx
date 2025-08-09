@@ -2,22 +2,57 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
+import { useSounds } from '@/hooks/useSounds';
 
 interface LoginScreenProps {
   onLogin: (username: string, password: string) => boolean;
+  onSignup: (username: string, password: string) => { success: boolean; error?: string };
 }
 
-export const LoginScreen = ({ onLogin }: LoginScreenProps) => {
+export const LoginScreen = ({ onLogin, onSignup }: LoginScreenProps) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
+  const [isSignup, setIsSignup] = useState(false);
+  const { playSelect, playIncorrect } = useSounds();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const success = onLogin(username, password);
-    if (!success) {
+    playSelect();
+    
+    if (!username || !password) {
       setError('Please enter both username and password');
+      playIncorrect();
+      return;
     }
+
+    if (isSignup) {
+      if (password !== confirmPassword) {
+        setError('Passwords do not match');
+        playIncorrect();
+        return;
+      }
+      
+      const result = onSignup(username, password);
+      if (!result.success) {
+        setError(result.error || 'Signup failed');
+        playIncorrect();
+      }
+    } else {
+      const success = onLogin(username, password);
+      if (!success) {
+        setError('Invalid username or password');
+        playIncorrect();
+      }
+    }
+  };
+
+  const toggleMode = () => {
+    playSelect();
+    setIsSignup(!isSignup);
+    setError('');
+    setConfirmPassword('');
   };
 
   return (
@@ -56,6 +91,18 @@ export const LoginScreen = ({ onLogin }: LoginScreenProps) => {
             />
           </div>
 
+          {isSignup && (
+            <div>
+              <Input
+                type="password"
+                placeholder="Confirm Password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="w-full bg-card/50 border-card-border"
+              />
+            </div>
+          )}
+
           {error && (
             <p className="text-destructive text-sm text-center">{error}</p>
           )}
@@ -64,12 +111,18 @@ export const LoginScreen = ({ onLogin }: LoginScreenProps) => {
             type="submit" 
             className="w-full btn-primary text-lg py-3"
           >
-            Enter the Cosmic Game
+            {isSignup ? 'Create Cosmic Account' : 'Enter the Cosmic Game'}
           </Button>
         </form>
 
-        <div className="mt-6 text-center text-sm text-muted-foreground">
-          Enter any username and password to start
+        <div className="mt-6 text-center">
+          <Button 
+            type="button"
+            onClick={toggleMode}
+            className="text-sm text-muted-foreground hover:text-primary transition-colors bg-transparent border-0 p-0 h-auto"
+          >
+            {isSignup ? 'Already have an account? Sign in' : 'Need an account? Sign up'}
+          </Button>
         </div>
       </Card>
     </div>

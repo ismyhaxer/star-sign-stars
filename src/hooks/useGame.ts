@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { GameState, Celebrity, CelebrityCategory, LeaderboardEntry } from '../types/game';
 import { getRandomCelebrities } from '../data/celebrities';
 import { calculateZodiacSign } from '../data/zodiac';
+import { useSounds } from './useSounds';
 
 const ROUNDS_PER_GAME = 5;
 const POINTS_PER_CORRECT = 20;
@@ -21,6 +22,7 @@ export const useGame = () => {
   });
 
   const [username, setUsername] = useState<string>('');
+  const { playTick, playCritical, playCorrect, playIncorrect, playSelect, playGameOver } = useSounds();
 
   // Timer effect
   useEffect(() => {
@@ -31,6 +33,7 @@ export const useGame = () => {
         setGameState(prev => {
           if (prev.timeLeft <= 1) {
             // Time's up - auto advance
+            playIncorrect();
             return {
               ...prev,
               timeLeft: 0,
@@ -41,6 +44,14 @@ export const useGame = () => {
                 correctZodiac: calculateZodiacSign(prev.currentCelebrity!.birthday).name
               }
             };
+          }
+          // Play tick sound for last 10 seconds
+          if (prev.timeLeft <= 10) {
+            if (prev.timeLeft <= 5) {
+              playCritical();
+            } else {
+              playTick();
+            }
           }
           return { ...prev, timeLeft: prev.timeLeft - 1 };
         });
@@ -58,6 +69,7 @@ export const useGame = () => {
       timeout = setTimeout(() => {
         if (gameState.currentRound >= ROUNDS_PER_GAME) {
           // Game over
+          playGameOver();
           setGameState(prev => ({ ...prev, gamePhase: 'game-over' }));
         } else {
           // Next round
@@ -70,8 +82,8 @@ export const useGame = () => {
   }, [gameState.gamePhase]);
 
   const login = useCallback((user: string, pass: string) => {
-    // Simple authentication - in real app would validate
-    if (user && pass) {
+    const users = JSON.parse(localStorage.getItem('zodiac-users') || '{}');
+    if (users[user] && users[user] === pass) {
       setUsername(user);
       setGameState(prev => ({ ...prev, gamePhase: 'category-selection' }));
       return true;
@@ -79,7 +91,20 @@ export const useGame = () => {
     return false;
   }, []);
 
+  const signup = useCallback((user: string, pass: string) => {
+    const users = JSON.parse(localStorage.getItem('zodiac-users') || '{}');
+    if (users[user]) {
+      return { success: false, error: 'Username already taken. Please choose a different one.' };
+    }
+    users[user] = pass;
+    localStorage.setItem('zodiac-users', JSON.stringify(users));
+    setUsername(user);
+    setGameState(prev => ({ ...prev, gamePhase: 'category-selection' }));
+    return { success: true };
+  }, []);
+
   const selectCategory = useCallback((category: CelebrityCategory) => {
+    playSelect();
     const celebrities = getRandomCelebrities(category, ROUNDS_PER_GAME);
     setGameState(prev => ({
       ...prev,
@@ -91,13 +116,20 @@ export const useGame = () => {
       timeLeft: ROUND_TIME,
       isAnswered: false
     }));
-  }, []);
+  }, [playSelect]);
 
   const answerQuestion = useCallback((selectedZodiac: string) => {
     if (gameState.isAnswered || !gameState.currentCelebrity) return;
 
     const correctZodiac = calculateZodiacSign(gameState.currentCelebrity.birthday);
     const isCorrect = selectedZodiac === correctZodiac.name;
+    
+    // Play sound based on correctness
+    if (isCorrect) {
+      playCorrect();
+    } else {
+      playIncorrect();
+    }
     
     setGameState(prev => ({
       ...prev,
@@ -110,7 +142,7 @@ export const useGame = () => {
       },
       gamePhase: 'feedback'
     }));
-  }, [gameState.isAnswered, gameState.currentCelebrity]);
+  }, [gameState.isAnswered, gameState.currentCelebrity, playCorrect, playIncorrect]);
 
   const nextRound = useCallback(() => {
     setGameState(prev => {
@@ -161,6 +193,7 @@ export const useGame = () => {
   }, [gameState.score, username, calculateGrade]);
 
   const resetGame = useCallback(() => {
+    playSelect();
     setGameState({
       currentRound: 0,
       score: 0,
@@ -172,16 +205,18 @@ export const useGame = () => {
       lastAnswer: null,
       usedCelebrities: []
     });
-  }, []);
+  }, [playSelect]);
 
   const showLeaderboard = useCallback(() => {
+    playSelect();
     setGameState(prev => ({ ...prev, gamePhase: 'leaderboard' }));
-  }, []);
+  }, [playSelect]);
 
   return {
     gameState,
     username,
     login,
+    signup,
     selectCategory,
     answerQuestion,
     calculateGrade,

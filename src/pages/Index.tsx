@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useGame } from '../hooks/useGame';
 import { LoginScreen } from '../components/LoginScreen';
 import { CategorySelection } from '../components/CategorySelection';
@@ -7,10 +8,12 @@ import { GameOverScreen } from '../components/GameOverScreen';
 import { Leaderboard } from '../components/Leaderboard';
 
 const Index = () => {
+  const [leaderboardRefresh, setLeaderboardRefresh] = useState(0);
   const {
     gameState,
     username,
     login,
+    signup,
     selectCategory,
     answerQuestion,
     calculateGrade,
@@ -21,10 +24,15 @@ const Index = () => {
     POINTS_PER_CORRECT
   } = useGame();
 
+  const handleSaveScore = () => {
+    saveScore();
+    setLeaderboardRefresh(prev => prev + 1); // Trigger leaderboard refresh
+  };
+
   const renderCurrentScreen = () => {
     switch (gameState.gamePhase) {
       case 'login':
-        return <LoginScreen onLogin={login} />;
+        return <LoginScreen onLogin={login} onSignup={signup} />;
         
       case 'category-selection':
         return (
@@ -67,15 +75,15 @@ const Index = () => {
             username={username}
             onPlayAgain={resetGame}
             onShowLeaderboard={showLeaderboard}
-            onSaveScore={saveScore}
+            onSaveScore={handleSaveScore}
           />
         );
         
       case 'leaderboard':
-        return <Leaderboard onBack={resetGame} />;
+        return <Leaderboard onBack={resetGame} refreshTrigger={leaderboardRefresh} />;
         
       default:
-        return <LoginScreen onLogin={login} />;
+        return <LoginScreen onLogin={login} onSignup={signup} />;
     }
   };
 

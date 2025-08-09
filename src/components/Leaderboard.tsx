@@ -4,15 +4,16 @@ import { LeaderboardEntry } from '../types/game';
 
 interface LeaderboardProps {
   onBack: () => void;
+  refreshTrigger?: number;
 }
 
-export const Leaderboard = ({ onBack }: LeaderboardProps) => {
+export const Leaderboard = ({ onBack, refreshTrigger }: LeaderboardProps) => {
   const [scores, setScores] = useState<LeaderboardEntry[]>([]);
 
   useEffect(() => {
     const savedScores = JSON.parse(localStorage.getItem('zodiac-leaderboard') || '[]');
     setScores(savedScores);
-  }, []);
+  }, [refreshTrigger]);
 
   const getPositionEmoji = (position: number): string => {
     const emojis = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟'];

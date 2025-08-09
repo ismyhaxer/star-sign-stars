@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
+import { BuyMeCoffee } from './BuyMeCoffee';
 
 interface GameOverScreenProps {
   score: number;
@@ -114,8 +115,13 @@ export const GameOverScreen = ({
           </Button>
         </div>
 
+        {/* Buy Me Coffee */}
+        <div className="mt-6">
+          <BuyMeCoffee />
+        </div>
+
         {/* Score Saved Indicator */}
-        <div className="mt-6 text-sm text-muted-foreground">
+        <div className="mt-4 text-sm text-muted-foreground">
           Your score has been saved to the leaderboard!
         </div>
       </div>

@@ -213,9 +213,12 @@
   }
 
   .btn-accent {
-    @apply rounded-xl px-6 py-3 font-medium text-accent-foreground transition-all duration-300;
-    background: var(--gradient-accent);
+    @apply bg-gradient-to-r from-accent to-accent-glow hover:from-accent-glow hover:to-accent text-white font-medium rounded-xl transition-all duration-300 hover:scale-105;
     box-shadow: 0 4px 16px hsl(var(--accent) / 0.3);
+  }
+
+  .btn-accent:hover {
+    box-shadow: 0 0 20px hsl(var(--accent-glow) / 0.5);
   }
 
   .btn-accent:hover {
