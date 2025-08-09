@@ -1,42 +1,76 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* Zodiac Celebrity Game Design System - Dark Theme with Cosmic Aesthetics */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Dark cosmic background theme */
+    --background: 224 71% 4%;
+    --foreground: 210 40% 98%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    /* Card system - dark glass morphism */
+    --card: 224 71% 8%;
+    --card-foreground: 210 40% 98%;
+    --card-border: 217 91% 20%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    /* Popover system */
+    --popover: 224 71% 6%;
+    --popover-foreground: 210 40% 98%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Primary brand colors - cosmic blue */
+    --primary: 217 91% 60%;
+    --primary-foreground: 224 71% 4%;
+    --primary-glow: 217 91% 70%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Secondary accent - cosmic orange */
+    --secondary: 24 95% 65%;
+    --secondary-foreground: 224 71% 4%;
+    --secondary-glow: 24 95% 75%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    /* Muted system */
+    --muted: 224 71% 12%;
+    --muted-foreground: 215 20% 65%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    /* Accent - cosmic purple */
+    --accent: 271 91% 65%;
+    --accent-foreground: 224 71% 4%;
+    --accent-glow: 271 91% 75%;
 
-    --destructive: 0 84.2% 60.2%;
+    /* Success/Error system */
+    --success: 142 76% 36%;
+    --success-foreground: 210 40% 98%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    /* Zodiac element colors */
+    --fire: 0 84% 60%;
+    --earth: 142 76% 36%;
+    --air: 48 96% 53%;
+    --water: 197 71% 52%;
 
-    --radius: 0.5rem;
+    /* Border and input system */
+    --border: 217 91% 20%;
+    --input: 224 71% 12%;
+    --ring: 217 91% 60%;
+
+    /* Design system tokens */
+    --radius: 1rem;
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
+    --gradient-secondary: linear-gradient(135deg, hsl(var(--secondary)), hsl(var(--secondary-glow)));
+    --gradient-accent: linear-gradient(135deg, hsl(var(--accent)), hsl(var(--accent-glow)));
+    --gradient-cosmic: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
+    
+    /* Shadows */
+    --shadow-glow: 0 0 40px hsl(var(--primary) / 0.3);
+    --shadow-card: 0 8px 32px hsl(224 71% 4% / 0.4);
+    --shadow-float: 0 20px 40px hsl(224 71% 4% / 0.6);
 
     --sidebar-background: 0 0% 98%;
 
@@ -100,6 +134,139 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-inter;
+    background: radial-gradient(ellipse at top, hsl(var(--background)) 0%, hsl(224 71% 2%) 100%);
+    min-height: 100vh;
+  }
+}
+
+@layer components {
+  /* Game specific component styles */
+  .category-card {
+    @apply relative overflow-hidden rounded-2xl border border-card-border bg-card/50 backdrop-blur-lg p-6 transition-all duration-300 hover:scale-105 hover:shadow-lg cursor-pointer;
+    background: linear-gradient(135deg, hsl(var(--card)) 0%, hsl(var(--card-border) / 0.1) 100%);
+  }
+
+  .category-card:hover {
+    box-shadow: var(--shadow-glow);
+  }
+
+  .zodiac-card {
+    @apply relative rounded-xl p-4 text-center transition-all duration-300 hover:scale-105 cursor-pointer border;
+    background: hsl(var(--card) / 0.6);
+    backdrop-filter: blur(12px);
+  }
+
+  .zodiac-card.fire {
+    @apply border-red-500/30 hover:border-red-500/60 hover:bg-red-500/10;
+    box-shadow: 0 0 20px hsl(var(--fire) / 0.2);
+  }
+
+  .zodiac-card.earth {
+    @apply border-green-500/30 hover:border-green-500/60 hover:bg-green-500/10;
+    box-shadow: 0 0 20px hsl(var(--earth) / 0.2);
+  }
+
+  .zodiac-card.air {
+    @apply border-yellow-500/30 hover:border-yellow-500/60 hover:bg-yellow-500/10;
+    box-shadow: 0 0 20px hsl(var(--air) / 0.2);
+  }
+
+  .zodiac-card.water {
+    @apply border-cyan-500/30 hover:border-cyan-500/60 hover:bg-cyan-500/10;
+    box-shadow: 0 0 20px hsl(var(--water) / 0.2);
+  }
+
+  .celebrity-card {
+    @apply relative overflow-hidden rounded-2xl bg-card/60 backdrop-blur-lg border border-card-border p-6;
+    background: linear-gradient(135deg, hsl(var(--card)) 0%, hsl(var(--muted)) 100%);
+    box-shadow: var(--shadow-card);
+  }
+
+  .gradient-text {
+    background: var(--gradient-cosmic);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .btn-primary {
+    @apply rounded-xl px-6 py-3 font-medium text-primary-foreground transition-all duration-300;
+    background: var(--gradient-primary);
+    box-shadow: 0 4px 16px hsl(var(--primary) / 0.3);
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px hsl(var(--primary) / 0.4);
+  }
+
+  .btn-secondary {
+    @apply rounded-xl px-6 py-3 font-medium text-secondary-foreground transition-all duration-300;
+    background: var(--gradient-secondary);
+    box-shadow: 0 4px 16px hsl(var(--secondary) / 0.3);
+  }
+
+  .btn-secondary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px hsl(var(--secondary) / 0.4);
+  }
+
+  .btn-accent {
+    @apply rounded-xl px-6 py-3 font-medium text-accent-foreground transition-all duration-300;
+    background: var(--gradient-accent);
+    box-shadow: 0 4px 16px hsl(var(--accent) / 0.3);
+  }
+
+  .btn-accent:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px hsl(var(--accent) / 0.4);
+  }
+
+  .floating-animation {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite alternate;
+  }
+
+  .timer-critical {
+    animation: timer-pulse 1s ease-in-out infinite;
+  }
+}
+
+@layer utilities {
+  .font-inter {
+    font-family: 'Inter', sans-serif;
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes pulse-glow {
+  0% {
+    box-shadow: 0 0 20px hsl(var(--primary) / 0.4);
+  }
+  100% {
+    box-shadow: 0 0 40px hsl(var(--primary) / 0.8);
+  }
+}
+
+@keyframes timer-pulse {
+  0%, 100% {
+    transform: scale(1);
+    color: hsl(var(--destructive));
+  }
+  50% {
+    transform: scale(1.05);
+    color: hsl(var(--destructive-foreground));
   }
 }
