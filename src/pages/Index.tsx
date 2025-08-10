@@ -19,6 +19,7 @@ const Index = () => {
     calculateGrade,
     saveScore,
     resetGame,
+    exitGame,
     showLeaderboard,
     ROUNDS_PER_GAME,
     POINTS_PER_CORRECT
@@ -51,6 +52,7 @@ const Index = () => {
             timeLeft={gameState.timeLeft}
             score={gameState.score}
             onAnswer={answerQuestion}
+            onExit={exitGame}
             isAnswered={gameState.isAnswered}
           />
         );

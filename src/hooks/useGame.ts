@@ -84,11 +84,19 @@ export const useGame = () => {
   const login = useCallback((user: string, pass: string) => {
     const users = JSON.parse(localStorage.getItem('zodiac-users') || '{}');
     if (users[user] && users[user] === pass) {
+      const lastPlayed = localStorage.getItem(`zodiac-lastplayed-${user}`);
+      const now = Date.now();
+      
+      if (lastPlayed && (now - parseInt(lastPlayed)) < 12 * 60 * 60 * 1000) {
+        const hoursLeft = Math.ceil((12 * 60 * 60 * 1000 - (now - parseInt(lastPlayed))) / (60 * 60 * 1000));
+        return { success: false, error: `You can play again in ${hoursLeft} hours. Come back later!` };
+      }
+      
       setUsername(user);
       setGameState(prev => ({ ...prev, gamePhase: 'category-selection' }));
-      return true;
+      return { success: true };
     }
-    return false;
+    return { success: false, error: 'Invalid username or password' };
   }, []);
 
   const signup = useCallback((user: string, pass: string) => {
@@ -177,19 +185,34 @@ export const useGame = () => {
     const percentage = (gameState.score / (ROUNDS_PER_GAME * POINTS_PER_CORRECT)) * 100;
     const grade = calculateGrade(gameState.score);
     
-    const entry: LeaderboardEntry = {
-      username,
-      score: gameState.score,
-      percentage: Math.round(percentage),
-      date: new Date().toISOString(),
-      grade
-    };
+    // Update cumulative score for user
+    const leaderboard = JSON.parse(localStorage.getItem('zodiac-leaderboard') || '[]');
+    const existingUserIndex = leaderboard.findIndex((entry: LeaderboardEntry) => entry.username === username);
+    
+    if (existingUserIndex >= 0) {
+      // Add to existing user's score
+      leaderboard[existingUserIndex].score += gameState.score;
+      leaderboard[existingUserIndex].percentage = Math.round((leaderboard[existingUserIndex].score / ((leaderboard[existingUserIndex].score / gameState.score) * ROUNDS_PER_GAME * POINTS_PER_CORRECT)) * 100);
+      leaderboard[existingUserIndex].grade = calculateGrade(leaderboard[existingUserIndex].score);
+      leaderboard[existingUserIndex].date = new Date().toISOString();
+    } else {
+      // Create new entry
+      const entry: LeaderboardEntry = {
+        username,
+        score: gameState.score,
+        percentage: Math.round(percentage),
+        date: new Date().toISOString(),
+        grade
+      };
+      leaderboard.push(entry);
+    }
 
-    // Save to localStorage
-    const existingScores = JSON.parse(localStorage.getItem('zodiac-leaderboard') || '[]');
-    existingScores.push(entry);
-    existingScores.sort((a: LeaderboardEntry, b: LeaderboardEntry) => b.score - a.score);
-    localStorage.setItem('zodiac-leaderboard', JSON.stringify(existingScores.slice(0, 10))); // Keep top 10
+    // Sort and save
+    leaderboard.sort((a: LeaderboardEntry, b: LeaderboardEntry) => b.score - a.score);
+    localStorage.setItem('zodiac-leaderboard', JSON.stringify(leaderboard.slice(0, 10)));
+    
+    // Record play time to enforce 12-hour limit
+    localStorage.setItem(`zodiac-lastplayed-${username}`, Date.now().toString());
   }, [gameState.score, username, calculateGrade]);
 
   const resetGame = useCallback(() => {
@@ -207,6 +230,22 @@ export const useGame = () => {
     });
   }, [playSelect]);
 
+  const exitGame = useCallback(() => {
+    playSelect();
+    setGameState(prev => ({
+      ...prev,
+      gamePhase: 'category-selection',
+      currentRound: 0,
+      score: 0,
+      selectedCategory: null,
+      currentCelebrity: null,
+      timeLeft: ROUND_TIME,
+      isAnswered: false,
+      lastAnswer: null,
+      usedCelebrities: []
+    }));
+  }, [playSelect]);
+
   const showLeaderboard = useCallback(() => {
     playSelect();
     setGameState(prev => ({ ...prev, gamePhase: 'leaderboard' }));
@@ -222,6 +261,7 @@ export const useGame = () => {
     calculateGrade,
     saveScore,
     resetGame,
+    exitGame,
     showLeaderboard,
     ROUNDS_PER_GAME,
     POINTS_PER_CORRECT

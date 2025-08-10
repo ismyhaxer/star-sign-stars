@@ -9,6 +9,7 @@ interface QuizScreenProps {
   timeLeft: number;
   score: number;
   onAnswer: (zodiac: string) => void;
+  onExit: () => void;
   isAnswered: boolean;
 }
 
@@ -31,6 +32,7 @@ export const QuizScreen = ({
   timeLeft, 
   score, 
   onAnswer, 
+  onExit,
   isAnswered 
 }: QuizScreenProps) => {
   const { imageUrl, isLoading, error } = useWikipediaImage(celebrity.name);
@@ -65,6 +67,18 @@ export const QuizScreen = ({
               }`}
               style={{ width: `${getTimerProgress()}%` }}
             ></div>
+          </div>
+        </div>
+
+        <div className="text-right">
+          <button
+            onClick={onExit}
+            className="px-4 py-2 bg-destructive/20 text-destructive rounded-lg hover:bg-destructive/30 transition-colors text-sm"
+          >
+            Exit Game
+          </button>
+          <div className="text-xs text-muted-foreground mt-1">
+            (Points won't be saved)
           </div>
         </div>
       </div>

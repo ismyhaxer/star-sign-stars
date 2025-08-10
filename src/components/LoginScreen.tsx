@@ -5,7 +5,7 @@ import { Card } from '@/components/ui/card';
 import { useSounds } from '@/hooks/useSounds';
 
 interface LoginScreenProps {
-  onLogin: (username: string, password: string) => boolean;
+  onLogin: (username: string, password: string) => { success: boolean; error?: string };
   onSignup: (username: string, password: string) => { success: boolean; error?: string };
 }
 
@@ -16,6 +16,15 @@ export const LoginScreen = ({ onLogin, onSignup }: LoginScreenProps) => {
   const [error, setError] = useState('');
   const [isSignup, setIsSignup] = useState(false);
   const { playSelect, playIncorrect } = useSounds();
+
+  const validatePassword = (password: string): string | null => {
+    if (password.length < 8) return 'Password must be at least 8 characters long';
+    if (!/[A-Z]/.test(password)) return 'Password must contain at least one uppercase letter';
+    if (!/[a-z]/.test(password)) return 'Password must contain at least one lowercase letter';
+    if (!/[0-9]/.test(password)) return 'Password must contain at least one number';
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) return 'Password must contain at least one special character';
+    return null;
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,6 +37,13 @@ export const LoginScreen = ({ onLogin, onSignup }: LoginScreenProps) => {
     }
 
     if (isSignup) {
+      const passwordError = validatePassword(password);
+      if (passwordError) {
+        setError(passwordError);
+        playIncorrect();
+        return;
+      }
+
       if (password !== confirmPassword) {
         setError('Passwords do not match');
         playIncorrect();
@@ -40,9 +56,9 @@ export const LoginScreen = ({ onLogin, onSignup }: LoginScreenProps) => {
         playIncorrect();
       }
     } else {
-      const success = onLogin(username, password);
-      if (!success) {
-        setError('Invalid username or password');
+      const result = onLogin(username, password);
+      if (!result.success) {
+        setError(result.error || 'Login failed');
         playIncorrect();
       }
     }
@@ -92,15 +108,20 @@ export const LoginScreen = ({ onLogin, onSignup }: LoginScreenProps) => {
           </div>
 
           {isSignup && (
-            <div>
-              <Input
-                type="password"
-                placeholder="Confirm Password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full bg-card/50 border-card-border"
-              />
-            </div>
+            <>
+              <div className="text-xs text-muted-foreground mb-2">
+                Password must contain: 8+ characters, uppercase, lowercase, number, and special character
+              </div>
+              <div>
+                <Input
+                  type="password"
+                  placeholder="Confirm Password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="w-full bg-card/50 border-card-border"
+                />
+              </div>
+            </>
           )}
 
           {error && (
