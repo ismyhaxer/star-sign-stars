@@ -2,7 +2,8 @@ import { CelebrityCategory } from '../types/game';
 
 interface CategorySelectionProps {
   onSelectCategory: (category: CelebrityCategory) => void;
-  username: string;
+  onShowLeaderboard: () => void;
+  onLogout: () => void;
 }
 
 const categories = [
@@ -14,12 +15,12 @@ const categories = [
   { id: 'ufc' as CelebrityCategory, name: 'UFC', emoji: '🥊', gradient: 'from-water to-cyan-400' }
 ];
 
-export const CategorySelection = ({ onSelectCategory, username }: CategorySelectionProps) => {
+export const CategorySelection = ({ onSelectCategory, onShowLeaderboard, onLogout }: CategorySelectionProps) => {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4">
       <div className="text-center mb-12">
         <h1 className="text-5xl font-bold gradient-text mb-4">
-          Welcome, {username}! ⭐
+          Choose Your Category ⭐
         </h1>
         <p className="text-xl text-muted-foreground mb-2">
           Choose your celebrity category
@@ -57,6 +58,22 @@ export const CategorySelection = ({ onSelectCategory, username }: CategorySelect
 
       <div className="mt-8 text-center text-sm text-muted-foreground">
         Click any category to start your cosmic journey!
+      </div>
+
+      {/* Action Buttons */}
+      <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
+        <button 
+          onClick={onShowLeaderboard}
+          className="btn-accent px-6 py-3 rounded-lg"
+        >
+          View Leaderboard 🏆
+        </button>
+        <button 
+          onClick={onLogout}
+          className="border border-border px-6 py-3 rounded-lg bg-background hover:bg-accent transition-colors"
+        >
+          Logout 🚪
+        </button>
       </div>
     </div>
   );

@@ -87,9 +87,9 @@ export const useGame = () => {
       const lastPlayed = localStorage.getItem(`zodiac-lastplayed-${user}`);
       const now = Date.now();
       
-      if (lastPlayed && (now - parseInt(lastPlayed)) < 12 * 60 * 60 * 1000) {
-        const hoursLeft = Math.ceil((12 * 60 * 60 * 1000 - (now - parseInt(lastPlayed))) / (60 * 60 * 1000));
-        return { success: false, error: `You can play again in ${hoursLeft} hours. Come back later!` };
+      if (lastPlayed && (now - parseInt(lastPlayed)) < 4 * 60 * 60 * 1000) {
+        const hoursLeft = Math.ceil((4 * 60 * 60 * 1000 - (now - parseInt(lastPlayed))) / (60 * 60 * 1000));
+        return { success: false, error: `Please come back in ${hoursLeft} hours for a new round!` };
       }
       
       setUsername(user);
@@ -102,7 +102,7 @@ export const useGame = () => {
   const signup = useCallback((user: string, pass: string) => {
     const users = JSON.parse(localStorage.getItem('zodiac-users') || '{}');
     if (users[user]) {
-      return { success: false, error: 'Username already taken. Please choose a different one.' };
+      return { success: false, error: 'This username is already taken. Please choose a different username.' };
     }
     users[user] = pass;
     localStorage.setItem('zodiac-users', JSON.stringify(users));
@@ -190,9 +190,10 @@ export const useGame = () => {
     const existingUserIndex = leaderboard.findIndex((entry: LeaderboardEntry) => entry.username === username);
     
     if (existingUserIndex >= 0) {
-      // Add to existing user's score
+      // Add to existing user's cumulative score
       leaderboard[existingUserIndex].score += gameState.score;
-      leaderboard[existingUserIndex].percentage = Math.round((leaderboard[existingUserIndex].score / ((leaderboard[existingUserIndex].score / gameState.score) * ROUNDS_PER_GAME * POINTS_PER_CORRECT)) * 100);
+      leaderboard[existingUserIndex].gamesPlayed = (leaderboard[existingUserIndex].gamesPlayed || 1) + 1;
+      leaderboard[existingUserIndex].percentage = Math.round((leaderboard[existingUserIndex].score / (leaderboard[existingUserIndex].gamesPlayed * ROUNDS_PER_GAME * POINTS_PER_CORRECT)) * 100);
       leaderboard[existingUserIndex].grade = calculateGrade(leaderboard[existingUserIndex].score);
       leaderboard[existingUserIndex].date = new Date().toISOString();
     } else {
@@ -202,7 +203,8 @@ export const useGame = () => {
         score: gameState.score,
         percentage: Math.round(percentage),
         date: new Date().toISOString(),
-        grade
+        grade,
+        gamesPlayed: 1
       };
       leaderboard.push(entry);
     }
@@ -251,11 +253,28 @@ export const useGame = () => {
     setGameState(prev => ({ ...prev, gamePhase: 'leaderboard' }));
   }, [playSelect]);
 
+  const logout = useCallback(() => {
+    playSelect();
+    setUsername('');
+    setGameState({
+      currentRound: 0,
+      score: 0,
+      selectedCategory: null,
+      currentCelebrity: null,
+      gamePhase: 'login',
+      timeLeft: ROUND_TIME,
+      isAnswered: false,
+      lastAnswer: null,
+      usedCelebrities: []
+    });
+  }, [playSelect]);
+
   return {
     gameState,
     username,
     login,
     signup,
+    logout,
     selectCategory,
     answerQuestion,
     calculateGrade,

@@ -4,10 +4,11 @@ import { LeaderboardEntry } from '../types/game';
 
 interface LeaderboardProps {
   onBack: () => void;
+  onLogout: () => void;
   refreshTrigger?: number;
 }
 
-export const Leaderboard = ({ onBack, refreshTrigger }: LeaderboardProps) => {
+export const Leaderboard = ({ onBack, onLogout, refreshTrigger }: LeaderboardProps) => {
   const [scores, setScores] = useState<LeaderboardEntry[]>([]);
 
   useEffect(() => {
@@ -108,13 +109,20 @@ export const Leaderboard = ({ onBack, refreshTrigger }: LeaderboardProps) => {
           </div>
         )}
 
-        {/* Back Button */}
-        <div className="text-center">
+        {/* Action Buttons */}
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Button 
             onClick={onBack}
             className="btn-primary px-8 py-3"
           >
             Back to Game ⭐
+          </Button>
+          <Button 
+            onClick={onLogout}
+            variant="outline"
+            className="px-8 py-3"
+          >
+            Logout 🚪
           </Button>
         </div>
       </div>

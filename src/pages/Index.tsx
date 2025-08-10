@@ -9,13 +9,14 @@ import { Leaderboard } from '../components/Leaderboard';
 
 const Index = () => {
   const [leaderboardRefresh, setLeaderboardRefresh] = useState(0);
-  const {
-    gameState,
+  const { 
+    gameState, 
     username,
     login,
     signup,
-    selectCategory,
-    answerQuestion,
+    logout,
+    selectCategory, 
+    answerQuestion, 
     calculateGrade,
     saveScore,
     resetGame,
@@ -38,8 +39,9 @@ const Index = () => {
       case 'category-selection':
         return (
           <CategorySelection 
-            onSelectCategory={selectCategory}
-            username={username}
+            onSelectCategory={selectCategory} 
+            onShowLeaderboard={showLeaderboard}
+            onLogout={logout}
           />
         );
         
@@ -82,7 +84,13 @@ const Index = () => {
         );
         
       case 'leaderboard':
-        return <Leaderboard onBack={resetGame} refreshTrigger={leaderboardRefresh} />;
+        return (
+          <Leaderboard 
+            onBack={resetGame}
+            onLogout={logout}
+            refreshTrigger={leaderboardRefresh}
+          />
+        );
         
       default:
         return <LoginScreen onLogin={login} onSignup={signup} />;

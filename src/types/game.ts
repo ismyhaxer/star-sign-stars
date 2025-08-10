@@ -39,6 +39,7 @@ export interface LeaderboardEntry {
   percentage: number;
   date: string;
   grade: string;
+  gamesPlayed?: number;
 }
 
 export interface User {
